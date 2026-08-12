@@ -183,4 +183,3 @@ async function afficherElevesSauvegardes() {
 
         let numero = 1;
 
-…
