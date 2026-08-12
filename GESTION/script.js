@@ -1,5 +1,21 @@
 
 
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAC5XlcpnhduauHiN9u-ML7fEBkSuHKAkg",
+  authDomain: "gestion-scolaire-ac269.firebaseapp.com",
+  projectId: "gestion-scolaire-ac269",
+  storageBucket: "gestion-scolaire-ac269.firebasestorage.app",
+  messagingSenderId: "237667733638",
+  appId: "1:237667733638:web:70a38ef93403fc718bc107"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
 function cacherSections() {
 
     document.getElementById("sectionAccueil").style.display = "none";
