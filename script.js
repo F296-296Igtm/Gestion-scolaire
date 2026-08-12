@@ -96,9 +96,9 @@ onSnapshot(collection(db, "élève"), (snapshot) => {
             const row = `
                 <tr>
                     <td>${index++}</td>
-                    <td>${eleve.Nom || ''}</td>
-                    <td>${eleve.Prenom || ''}</td>
-                    <td>${eleve.Classe || ''}</td>
+                   <td>${eleve.Nom || eleve.nom || ''}</td>
+                    <td>${eleve.Prenom || eleve.prenom || ''}</td>
+                    <td>${eleve.Classe || eleve.classe || ''}</td>
                     <td><button class="danger" onclick="supprimerEleve('${doc.id}')">🗑️</button></td>
                 </tr>
             `;
