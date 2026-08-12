@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Gestion Scolaire</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- EN-TÊTE -->
+    <header class="header">
+        <div>
+            <h1>🎓 Gestion Scolaire</h1>
+            <p>Administration de votre établissement</p>
+        </div>
+    </header>
+
+
+    <!-- MENU -->
+    <nav class="menu">
+
+        <button onclick="afficherAccueil()">
+            🏠 Tableau de bord
+        </button>
+
+        <button onclick="afficherEleves()">
+            👨‍🎓 Élèves
+        </button>
+
+        <button onclick="afficherEnseignants()">
+            👨‍🏫 Enseignants
+        </button>
+
+        <button onclick="afficherClasses()">
+            🏫 Classes
+        </button>
+
+        <button onclick="afficherMatieres()">
+            📚 Matières
+        </button>
+
+        <button onclick="afficherNotes()">
+            📝 Notes
+        </button>
+
+    </nav>
+
+
+    <!-- CONTENU PRINCIPAL -->
+    <main>
+
+
+        <!-- TABLEAU DE BORD -->
+        <section id="sectionAccueil" class="section">
+
+            <h2>📊 Tableau de bord</h2>
+
+            <p class="bienvenue">
+                Bienvenue dans votre application de Gestion Scolaire.
+            </p>
+
+            <div class="statistiques">
+
+                <div class="carte">
+                    <div class="icone">👨‍🎓</div>
+                    <h3>Élèves</h3>
+                    <strong id="nombreEleves">0</strong>
+                </div>
+
+                <div class="carte">
+                    <div class="icone">👨‍🏫</div>
+                    <h3>Enseignants</h3>
+                    <strong id="nombreEnseignants">0</strong>
+                </div>
+
+                <div class="carte">
+                    <div class="icone">🏫</div>
+                    <h3>Classes</h3>
+                    <strong id="nombreClasses">0</strong>
+                </div>
+
+                <div class="carte">
+                    <div class="icone">📚</div>
+                    <h3>Matières</h3>
+                    <strong id="nombreMatieres">0</strong>
+                </div>
+
+                <div class="carte">
+                    <div class="icone">📝</div>
+                    <h3>Notes</h3>
+                    <strong id="nombreNotes">0</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ÉLÈVES -->
+        <section id="sectionEleves" class="section" style="display: none;">
+
+            <h2>👨‍🎓 Gestion des élèves</h2>
+
+            <div class="formulaire">
+
+                <input
+                    type="text"
+                    id="nomEleve"
+                    placeholder="Nom de l'élève"
+                >
+
+                <input
+                    type="text"
+                    id="prenomEleve"
+                    placeholder="Prénom de l'élève"
+                >
+
+                <input
+                    type="text"
+                    id="classeEleve"
+                    placeholder="Classe"
+                >
+
+                <button onclick="ajouterEleve()">
+                    ➕ Ajouter l'élève
+                </button>
+
+                <button class="danger" onclick="viderEleves()">
+                    🗑️ Vider la liste
+                </button>
+
+            </div>
+
+
+            <h3>Liste des élèves</h3>
+
+            <div class="table-container">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>N°</th>
+                            <th>Nom</th>
+                            <th>Prénom</th>
+                            <th>Classe</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="listeEleves"></tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- ENSEIGNANTS -->
+        <section id="sectionEnseignants" class="section" style="display: none;">
+
+            <h2>👨‍🏫 Gestion des enseignants</h2>
+
+            <div class="formulaire">
+
+                <input
+                    type="text"
+                    id="nomEnseignant"
+                    placeholder="Nom de l'enseignant"
+                >
+
+                <input
+                    type="text"
+                    id="matiereEnseignant"
+                    placeholder="Matière enseignée"
+                >
+
+                <button onclick="ajouterEnseignant()">
+                    ➕ Ajouter
+                </button>
+
+            </div>
+
+            <h3>Liste des enseignants</h3>
+
+            <ul id="listeEnseignants" class="liste"></ul>
+
+        </section>
+
+
+        <!-- CLASSES -->
+        <section id="sectionClasses" class="section" style="display: none;">
+
+            <h2>🏫 Gestion des classes</h2>
+
+            <div class="formulaire">
+
+                <input
+                    type="text"
+                    id="nomClasse"
+                    placeholder="Nom de la classe"
+                >
+
+                <button onclick="ajouterClasse()">
+                    ➕ Ajouter
+                </button>
+
+            </div>
+
+            <h3>Liste des classes</h3>
+
+            <ul id="listeClasses" class="liste"></ul>
+
+        </section>
+
+
+        <!-- MATIÈRES -->
+        <section id="sectionMatieres" class="section" style="display: none;">
+
+            <h2>📚 Gestion des matières</h2>
+
+            <div class="formulaire">
+
+                <input
+                    type="text"
+                    id="nomMatiere"
+                    placeholder="Nom de la matière"
+                >
+
+                <button onclick="ajouterMatiere()">
+                    ➕ Ajouter
+                </button>
+
+            </div>
+
+            <h3>Liste des matières</h3>
+
+            <ul id="listeMatieres" class="liste"></ul>
+
+        </section>
+
+
+        <!-- NOTES -->
+        <section id="sectionNotes" class="section" style="display: none;">
+
+            <h2>📝 Gestion des notes</h2>
+
+            <div class="formulaire">
+
+                <input
+                    type="text"
+                    id="nomEleveNote"
+                    placeholder="Nom de l'élève"
+                >
+
+                <input
+                    type="number"
+                    id="noteEleve"
+                    placeholder="Note /20"
+                    min="0"
+                    max="20"
+                >
+
+                <button onclick="ajouterNote()">
+                    ➕ Ajouter la note
+                </button>
+
+            </div>
+
+            <h3>Liste des notes</h3>
+
+            <ul id="listeNotes" class="liste"></ul>
+
+        </section>
+
+    </main>
+
+
+    <!-- PIED DE PAGE -->
+    <footer>
+
+        <p>
+            © 2026 Gestion Scolaire — Application de gestion
+        </p>
+
+    </footer>
+
+
+    <script src="./script.js"></script>
+
+</body>
+</html>
