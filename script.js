@@ -24,11 +24,6 @@ const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
 
-
-// =====================================================
-// CACHER LES SECTIONS
-// =====================================================
-
 function cacherSections() {
 
     document.getElementById("sectionAccueil").style.display = "none";
@@ -43,11 +38,6 @@ function cacherSections() {
 
     document.getElementById("sectionNotes").style.display = "none";
 }
-
-
-// =====================================================
-// ACCUEIL
-// =====================================================
 
 function afficherAccueil() {
 
@@ -208,11 +198,6 @@ async function afficherElevesSauvegardes() {
     }
 }
 
-
-// =====================================================
-// SUPPRIMER UN ÉLÈVE FIRESTORE
-// =====================================================
-
 async function supprimerEleve(id) {
 
     if (
@@ -250,11 +235,6 @@ async function supprimerEleve(id) {
         }
     }
 }
-
-
-// =====================================================
-// VIDER TOUS LES ÉLÈVES
-// =====================================================
 
 async function viderEleves() {
 
@@ -312,11 +292,6 @@ async function viderEleves() {
         );
     }
 }
-
-
-// =====================================================
-// ENSEIGNANTS
-// =====================================================
 
 function afficherEnseignants() {
 
@@ -493,10 +468,6 @@ function supprimerEnseignant(index) {
 }
 
 
-// =====================================================
-// CLASSES
-// =====================================================
-
 function afficherClasses() {
 
     cacherSections();
@@ -650,9 +621,6 @@ function supprimerClasse(index) {
 }
 
 
-// =====================================================
-// MATIÈRES
-// =====================================================
 
 function afficherMatieres() {
 
@@ -807,9 +775,6 @@ function supprimerMatiere(index) {
 }
 
 
-// =====================================================
-// NOTES
-// =====================================================
 
 function afficherNotes() {
 
@@ -1004,9 +969,6 @@ function supprimerNote(index) {
 }
 
 
-// =====================================================
-// STATISTIQUES
-// =====================================================
 
 async function mettreAJourStatistiques() {
 
@@ -1131,11 +1093,6 @@ async function mettreAJourStatistiques() {
             notes.length;
     }
 }
-
-
-// =====================================================
-// RENDRE LES FONCTIONS ACCESSIBLES AUX BOUTONS HTML
-// =====================================================
 
 window.cacherSections =
     cacherSections;
