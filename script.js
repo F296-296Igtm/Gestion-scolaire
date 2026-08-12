@@ -1,13 +1,53 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+
+import {
+    getFirestore,
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc
+} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+
+
+const firebaseConfig = {
+    apiKey: "AIzaSyAC5XlcpnhduauHiN9u-ML7fEBkSuHKAkg",
+    authDomain: "gestion-scolaire-ac269.firebaseapp.com",
+    projectId: "gestion-scolaire-ac269",
+    storageBucket: "gestion-scolaire-ac269.firebasestorage.app",
+    messagingSenderId: "237667733638",
+    appId: "1:237667733638:web:70a38ef93403fc718bc107"
+};
+
+
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
+
+// =====================================================
+// CACHER LES SECTIONS
+// =====================================================
+
 function cacherSections() {
 
     document.getElementById("sectionAccueil").style.display = "none";
+
     document.getElementById("sectionEleves").style.display = "none";
+
     document.getElementById("sectionEnseignants").style.display = "none";
+
     document.getElementById("sectionClasses").style.display = "none";
+
     document.getElementById("sectionMatieres").style.display = "none";
+
     document.getElementById("sectionNotes").style.display = "none";
 }
 
+
+// =====================================================
+// ACCUEIL
+// =====================================================
 
 function afficherAccueil() {
 
@@ -19,21 +59,27 @@ function afficherAccueil() {
 }
 
 
-function afficherEleves() {
+async function afficherEleves() {
 
     cacherSections();
 
     document.getElementById("sectionEleves").style.display = "block";
 
-    afficherElevesSauvegardes();
+    await afficherElevesSauvegardes();
 }
 
 
-function ajouterEleve() {
+async function ajouterEleve() {
 
-    let nom = document.getElementById("nomEleve").value.trim();
-    let prenom = document.getElementById("prenomEleve").value.trim();
-    let classe = document.getElementById("classeEleve").value.trim();
+    let nom =
+        document.getElementById("nomEleve").value.trim();
+
+    let prenom =
+        document.getElementById("prenomEleve").value.trim();
+
+    let classe =
+        document.getElementById("classeEleve").value.trim();
+
 
     if (nom === "" || prenom === "" || classe === "") {
 
@@ -43,40 +89,45 @@ function ajouterEleve() {
     }
 
 
-    let eleves = JSON.parse(localStorage.getItem("eleves")) || [];
+    try {
+
+        await addDoc(
+            collection(db, "eleves"),
+            {
+                nom: nom,
+                prenom: prenom,
+                classe: classe,
+                dateAjout: new Date()
+            }
+        );
 
 
-    eleves.push({
-
-        nom: nom,
-        prenom: prenom,
-        classe: classe
-
-    });
+        alert("Élève ajouté avec succès !");
 
 
-    localStorage.setItem(
-        "eleves",
-        JSON.stringify(eleves)
-    );
+        document.getElementById("nomEleve").value = "";
+
+        document.getElementById("prenomEleve").value = "";
+
+        document.getElementById("classeEleve").value = "";
 
 
-    document.getElementById("nomEleve").value = "";
-    document.getElementById("prenomEleve").value = "";
-    document.getElementById("classeEleve").value = "";
+        await afficherElevesSauvegardes();
 
+        mettreAJourStatistiques();
 
-    afficherElevesSauvegardes();
+    }
 
-    mettreAJourStatistiques();
+    catch (erreur) {
+
+        console.error("Erreur Firebase :", erreur);
+
+        alert("Impossible d'enregistrer l'élève.");
+    }
 }
 
 
-function afficherElevesSauvegardes() {
-
-    let eleves =
-        JSON.parse(localStorage.getItem("eleves")) || [];
-
+async function afficherElevesSauvegardes() {
 
     let tableau =
         document.getElementById("listeEleves");
@@ -88,119 +139,81 @@ function afficherElevesSauvegardes() {
     tableau.innerHTML = "";
 
 
-    eleves.forEach(function(eleve, index) {
+    try {
 
-        let ligne = tableau.insertRow();
-
-
-        ligne.insertCell(0).textContent = index + 1;
-
-        ligne.insertCell(1).textContent = eleve.nom;
-
-        ligne.insertCell(2).textContent = eleve.prenom;
-
-        ligne.insertCell(3).textContent = eleve.classe;
+        const resultat =
+            await getDocs(collection(db, "eleves"));
 
 
-        let actions = ligne.insertCell(4);
+        let index = 1;
 
 
-        actions.innerHTML = `
+        resultat.forEach(function(documentFirebase) {
 
-            <button
-                class="btn-modifier"
-                onclick="modifierEleve(${index})">
-                ✏️
-            </button>
-
-            <button
-                class="btn-supprimer"
-                onclick="supprimerEleve(${index})">
-                🗑️
-            </button>
-
-        `;
-
-    });
-}
+            let eleve =
+                documentFirebase.data();
 
 
-function modifierEleve(index) {
-
-    let eleves =
-        JSON.parse(localStorage.getItem("eleves")) || [];
+            let ligne =
+                tableau.insertRow();
 
 
-    let eleve = eleves[index];
+            ligne.insertCell(0).textContent =
+                index;
 
 
-    let nom = prompt(
-        "Modifier le nom :",
-        eleve.nom
-    );
+            ligne.insertCell(1).textContent =
+                eleve.nom;
 
 
-    if (nom === null) return;
+            ligne.insertCell(2).textContent =
+                eleve.prenom;
 
 
-    let prenom = prompt(
-        "Modifier le prénom :",
-        eleve.prenom
-    );
+            ligne.insertCell(3).textContent =
+                eleve.classe;
 
 
-    if (prenom === null) return;
+            let actions =
+                ligne.insertCell(4);
 
 
-    let classe = prompt(
-        "Modifier la classe :",
-        eleve.classe
-    );
+            actions.innerHTML = `
+
+                <button
+                    class="btn-supprimer"
+                    onclick="supprimerEleve('${documentFirebase.id}')">
+                    🗑️
+                </button>
+
+            `;
 
 
-    if (classe === null) return;
+            index++;
 
+        });
 
-    if (
-        nom.trim() === "" ||
-        prenom.trim() === "" ||
-        classe.trim() === ""
-    ) {
-
-        alert("Les champs ne peuvent pas être vides.");
-
-        return;
     }
 
+    catch (erreur) {
 
-    eleves[index] = {
+        console.error(
+            "Erreur lors du chargement des élèves :",
+            erreur
+        );
 
-        nom: nom.trim(),
-
-        prenom: prenom.trim(),
-
-        classe: classe.trim()
-
-    };
-
-
-    localStorage.setItem(
-        "eleves",
-        JSON.stringify(eleves)
-    );
-
-
-    afficherElevesSauvegardes();
-
-    mettreAJourStatistiques();
+        alert(
+            "Impossible de charger les élèves."
+        );
+    }
 }
 
 
-function supprimerEleve(index) {
+// =====================================================
+// SUPPRIMER UN ÉLÈVE FIRESTORE
+// =====================================================
 
-    let eleves =
-        JSON.parse(localStorage.getItem("eleves")) || [];
-
+async function supprimerEleve(id) {
 
     if (
         confirm(
@@ -208,44 +221,110 @@ function supprimerEleve(index) {
         )
     ) {
 
-        eleves.splice(index, 1);
+        try {
+
+            await deleteDoc(
+                doc(db, "eleves", id)
+            );
 
 
-        localStorage.setItem(
-            "eleves",
-            JSON.stringify(eleves)
-        );
+            alert("Élève supprimé.");
 
 
-        afficherElevesSauvegardes();
+            await afficherElevesSauvegardes();
 
-        mettreAJourStatistiques();
+            mettreAJourStatistiques();
+
+        }
+
+        catch (erreur) {
+
+            console.error(
+                "Erreur suppression :",
+                erreur
+            );
+
+            alert(
+                "Impossible de supprimer l'élève."
+            );
+        }
     }
 }
 
 
-function viderEleves() {
+// =====================================================
+// VIDER TOUS LES ÉLÈVES
+// =====================================================
+
+async function viderEleves() {
 
     if (
-        confirm(
+        !confirm(
             "Voulez-vous vraiment supprimer tous les élèves ?"
         )
     ) {
 
-        localStorage.removeItem("eleves");
+        return;
+    }
 
-        afficherElevesSauvegardes();
+
+    try {
+
+        const resultat =
+            await getDocs(
+                collection(db, "eleves")
+            );
+
+
+        for (
+            const documentFirebase
+            of resultat.docs
+        ) {
+
+            await deleteDoc(
+                doc(
+                    db,
+                    "eleves",
+                    documentFirebase.id
+                )
+            );
+        }
+
+
+        alert("Tous les élèves ont été supprimés.");
+
+
+        await afficherElevesSauvegardes();
 
         mettreAJourStatistiques();
+
+    }
+
+    catch (erreur) {
+
+        console.error(
+            "Erreur :",
+            erreur
+        );
+
+        alert(
+            "Impossible de vider la liste."
+        );
     }
 }
 
+
+// =====================================================
+// ENSEIGNANTS
+// =====================================================
 
 function afficherEnseignants() {
 
     cacherSections();
 
-    document.getElementById("sectionEnseignants").style.display = "block";
+    document.getElementById(
+        "sectionEnseignants"
+    ).style.display = "block";
 
     afficherEnseignantsSauvegardes();
 }
@@ -254,22 +333,36 @@ function afficherEnseignants() {
 function ajouterEnseignant() {
 
     let nom =
-        document.getElementById("nomEnseignant").value.trim();
+        document.getElementById(
+            "nomEnseignant"
+        ).value.trim();
+
 
     let matiere =
-        document.getElementById("matiereEnseignant").value.trim();
+        document.getElementById(
+            "matiereEnseignant"
+        ).value.trim();
 
 
-    if (nom === "" || matiere === "") {
+    if (
+        nom === "" ||
+        matiere === ""
+    ) {
 
-        alert("Veuillez remplir tous les champs.");
+        alert(
+            "Veuillez remplir tous les champs."
+        );
 
         return;
     }
 
 
     let enseignants =
-        JSON.parse(localStorage.getItem("enseignants")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "enseignants"
+            )
+        ) || [];
 
 
     enseignants.push({
@@ -283,13 +376,20 @@ function ajouterEnseignant() {
 
     localStorage.setItem(
         "enseignants",
-        JSON.stringify(enseignants)
+        JSON.stringify(
+            enseignants
+        )
     );
 
 
-    document.getElementById("nomEnseignant").value = "";
+    document.getElementById(
+        "nomEnseignant"
+    ).value = "";
 
-    document.getElementById("matiereEnseignant").value = "";
+
+    document.getElementById(
+        "matiereEnseignant"
+    ).value = "";
 
 
     afficherEnseignantsSauvegardes();
@@ -301,57 +401,88 @@ function ajouterEnseignant() {
 function afficherEnseignantsSauvegardes() {
 
     let enseignants =
-        JSON.parse(localStorage.getItem("enseignants")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "enseignants"
+            )
+        ) || [];
 
 
     let liste =
-        document.getElementById("listeEnseignants");
+        document.getElementById(
+            "listeEnseignants"
+        );
+
+
+    if (!liste) return;
 
 
     liste.innerHTML = "";
 
 
-    enseignants.forEach(function(enseignant, index) {
+    enseignants.forEach(
+        function(
+            enseignant,
+            index
+        ) {
 
-        let li = document.createElement("li");
-
-
-        li.innerHTML = `
-
-            <span>
-                👨‍🏫 ${enseignant.nom}
-                — ${enseignant.matiere}
-            </span>
-
-            <button
-                class="btn-supprimer"
-                onclick="supprimerEnseignant(${index})">
-                🗑️
-            </button>
-
-        `;
+            let li =
+                document.createElement(
+                    "li"
+                );
 
 
-        liste.appendChild(li);
+            li.innerHTML = `
 
-    });
+                <span>
+                    👨‍🏫
+                    ${enseignant.nom}
+                    — ${enseignant.matiere}
+                </span>
+
+                <button
+                    class="btn-supprimer"
+                    onclick="supprimerEnseignant(${index})">
+                    🗑️
+                </button>
+
+            `;
+
+
+            liste.appendChild(li);
+
+        }
+    );
 }
 
 
 function supprimerEnseignant(index) {
 
     let enseignants =
-        JSON.parse(localStorage.getItem("enseignants")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "enseignants"
+            )
+        ) || [];
 
 
-    if (confirm("Supprimer cet enseignant ?")) {
+    if (
+        confirm(
+            "Supprimer cet enseignant ?"
+        )
+    ) {
 
-        enseignants.splice(index, 1);
+        enseignants.splice(
+            index,
+            1
+        );
 
 
         localStorage.setItem(
             "enseignants",
-            JSON.stringify(enseignants)
+            JSON.stringify(
+                enseignants
+            )
         );
 
 
@@ -362,11 +493,17 @@ function supprimerEnseignant(index) {
 }
 
 
+// =====================================================
+// CLASSES
+// =====================================================
+
 function afficherClasses() {
 
     cacherSections();
 
-    document.getElementById("sectionClasses").style.display = "block";
+    document.getElementById(
+        "sectionClasses"
+    ).style.display = "block";
 
     afficherClassesSauvegardees();
 }
@@ -375,19 +512,27 @@ function afficherClasses() {
 function ajouterClasse() {
 
     let nom =
-        document.getElementById("nomClasse").value.trim();
+        document.getElementById(
+            "nomClasse"
+        ).value.trim();
 
 
     if (nom === "") {
 
-        alert("Veuillez entrer une classe.");
+        alert(
+            "Veuillez entrer une classe."
+        );
 
         return;
     }
 
 
     let classes =
-        JSON.parse(localStorage.getItem("classes")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "classes"
+            )
+        ) || [];
 
 
     classes.push(nom);
@@ -395,11 +540,15 @@ function ajouterClasse() {
 
     localStorage.setItem(
         "classes",
-        JSON.stringify(classes)
+        JSON.stringify(
+            classes
+        )
     );
 
 
-    document.getElementById("nomClasse").value = "";
+    document.getElementById(
+        "nomClasse"
+    ).value = "";
 
 
     afficherClassesSauvegardees();
@@ -411,56 +560,86 @@ function ajouterClasse() {
 function afficherClassesSauvegardees() {
 
     let classes =
-        JSON.parse(localStorage.getItem("classes")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "classes"
+            )
+        ) || [];
 
 
     let liste =
-        document.getElementById("listeClasses");
+        document.getElementById(
+            "listeClasses"
+        );
+
+
+    if (!liste) return;
 
 
     liste.innerHTML = "";
 
 
-    classes.forEach(function(classe, index) {
+    classes.forEach(
+        function(
+            classe,
+            index
+        ) {
 
-        let li = document.createElement("li");
-
-
-        li.innerHTML = `
-
-            <span>
-                🏫 ${classe}
-            </span>
-
-            <button
-                class="btn-supprimer"
-                onclick="supprimerClasse(${index})">
-                🗑️
-            </button>
-
-        `;
+            let li =
+                document.createElement(
+                    "li"
+                );
 
 
-        liste.appendChild(li);
+            li.innerHTML = `
 
-    });
+                <span>
+                    🏫 ${classe}
+                </span>
+
+                <button
+                    class="btn-supprimer"
+                    onclick="supprimerClasse(${index})">
+                    🗑️
+                </button>
+
+            `;
+
+
+            liste.appendChild(li);
+
+        }
+    );
 }
 
 
 function supprimerClasse(index) {
 
     let classes =
-        JSON.parse(localStorage.getItem("classes")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "classes"
+            )
+        ) || [];
 
 
-    if (confirm("Supprimer cette classe ?")) {
+    if (
+        confirm(
+            "Supprimer cette classe ?"
+        )
+    ) {
 
-        classes.splice(index, 1);
+        classes.splice(
+            index,
+            1
+        );
 
 
         localStorage.setItem(
             "classes",
-            JSON.stringify(classes)
+            JSON.stringify(
+                classes
+            )
         );
 
 
@@ -471,12 +650,17 @@ function supprimerClasse(index) {
 }
 
 
+// =====================================================
+// MATIÈRES
+// =====================================================
 
 function afficherMatieres() {
 
     cacherSections();
 
-    document.getElementById("sectionMatieres").style.display = "block";
+    document.getElementById(
+        "sectionMatieres"
+    ).style.display = "block";
 
     afficherMatieresSauvegardees();
 }
@@ -485,19 +669,27 @@ function afficherMatieres() {
 function ajouterMatiere() {
 
     let matiere =
-        document.getElementById("nomMatiere").value.trim();
+        document.getElementById(
+            "nomMatiere"
+        ).value.trim();
 
 
     if (matiere === "") {
 
-        alert("Veuillez entrer une matière.");
+        alert(
+            "Veuillez entrer une matière."
+        );
 
         return;
     }
 
 
     let matieres =
-        JSON.parse(localStorage.getItem("matieres")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "matieres"
+            )
+        ) || [];
 
 
     matieres.push(matiere);
@@ -505,11 +697,15 @@ function ajouterMatiere() {
 
     localStorage.setItem(
         "matieres",
-        JSON.stringify(matieres)
+        JSON.stringify(
+            matieres
+        )
     );
 
 
-    document.getElementById("nomMatiere").value = "";
+    document.getElementById(
+        "nomMatiere"
+    ).value = "";
 
 
     afficherMatieresSauvegardees();
@@ -521,56 +717,86 @@ function ajouterMatiere() {
 function afficherMatieresSauvegardees() {
 
     let matieres =
-        JSON.parse(localStorage.getItem("matieres")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "matieres"
+            )
+        ) || [];
 
 
     let liste =
-        document.getElementById("listeMatieres");
+        document.getElementById(
+            "listeMatieres"
+        );
+
+
+    if (!liste) return;
 
 
     liste.innerHTML = "";
 
 
-    matieres.forEach(function(matiere, index) {
+    matieres.forEach(
+        function(
+            matiere,
+            index
+        ) {
 
-        let li = document.createElement("li");
-
-
-        li.innerHTML = `
-
-            <span>
-                📚 ${matiere}
-            </span>
-
-            <button
-                class="btn-supprimer"
-                onclick="supprimerMatiere(${index})">
-                🗑️
-            </button>
-
-        `;
+            let li =
+                document.createElement(
+                    "li"
+                );
 
 
-        liste.appendChild(li);
+            li.innerHTML = `
 
-    });
+                <span>
+                    📚 ${matiere}
+                </span>
+
+                <button
+                    class="btn-supprimer"
+                    onclick="supprimerMatiere(${index})">
+                    🗑️
+                </button>
+
+            `;
+
+
+            liste.appendChild(li);
+
+        }
+    );
 }
 
 
 function supprimerMatiere(index) {
 
     let matieres =
-        JSON.parse(localStorage.getItem("matieres")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "matieres"
+            )
+        ) || [];
 
 
-    if (confirm("Supprimer cette matière ?")) {
+    if (
+        confirm(
+            "Supprimer cette matière ?"
+        )
+    ) {
 
-        matieres.splice(index, 1);
+        matieres.splice(
+            index,
+            1
+        );
 
 
         localStorage.setItem(
             "matieres",
-            JSON.stringify(matieres)
+            JSON.stringify(
+                matieres
+            )
         );
 
 
@@ -581,11 +807,17 @@ function supprimerMatiere(index) {
 }
 
 
+// =====================================================
+// NOTES
+// =====================================================
+
 function afficherNotes() {
 
     cacherSections();
 
-    document.getElementById("sectionNotes").style.display = "block";
+    document.getElementById(
+        "sectionNotes"
+    ).style.display = "block";
 
     afficherNotesSauvegardees();
 }
@@ -594,16 +826,25 @@ function afficherNotes() {
 function ajouterNote() {
 
     let eleve =
-        document.getElementById("nomEleveNote").value.trim();
+        document.getElementById(
+            "nomEleveNote"
+        ).value.trim();
 
 
     let note =
-        document.getElementById("noteEleve").value;
+        document.getElementById(
+            "noteEleve"
+        ).value;
 
 
-    if (eleve === "" || note === "") {
+    if (
+        eleve === "" ||
+        note === ""
+    ) {
 
-        alert("Veuillez remplir tous les champs.");
+        alert(
+            "Veuillez remplir tous les champs."
+        );
 
         return;
     }
@@ -612,16 +853,25 @@ function ajouterNote() {
     note = Number(note);
 
 
-    if (note < 0 || note > 20) {
+    if (
+        note < 0 ||
+        note > 20
+    ) {
 
-        alert("La note doit être comprise entre 0 et 20.");
+        alert(
+            "La note doit être comprise entre 0 et 20."
+        );
 
         return;
     }
 
 
     let notes =
-        JSON.parse(localStorage.getItem("notes")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "notes"
+            )
+        ) || [];
 
 
     notes.push({
@@ -635,13 +885,20 @@ function ajouterNote() {
 
     localStorage.setItem(
         "notes",
-        JSON.stringify(notes)
+        JSON.stringify(
+            notes
+        )
     );
 
 
-    document.getElementById("nomEleveNote").value = "";
+    document.getElementById(
+        "nomEleveNote"
+    ).value = "";
 
-    document.getElementById("noteEleve").value = "";
+
+    document.getElementById(
+        "noteEleve"
+    ).value = "";
 
 
     afficherNotesSauvegardees();
@@ -653,56 +910,90 @@ function ajouterNote() {
 function afficherNotesSauvegardees() {
 
     let notes =
-        JSON.parse(localStorage.getItem("notes")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "notes"
+            )
+        ) || [];
 
 
     let liste =
-        document.getElementById("listeNotes");
+        document.getElementById(
+            "listeNotes"
+        );
+
+
+    if (!liste) return;
 
 
     liste.innerHTML = "";
 
 
-    notes.forEach(function(note, index) {
+    notes.forEach(
+        function(
+            note,
+            index
+        ) {
 
-        let li = document.createElement("li");
-
-
-        li.innerHTML = `
-
-            <span>
-                📝 ${note.eleve} : <strong>${note.note}/20</strong>
-            </span>
-
-            <button
-                class="btn-supprimer"
-                onclick="supprimerNote(${index})">
-                🗑️
-            </button>
-
-        `;
+            let li =
+                document.createElement(
+                    "li"
+                );
 
 
-        liste.appendChild(li);
+            li.innerHTML = `
 
-    });
+                <span>
+                    📝
+                    ${note.eleve} :
+                    <strong>
+                        ${note.note}/20
+                    </strong>
+                </span>
+
+                <button
+                    class="btn-supprimer"
+                    onclick="supprimerNote(${index})">
+                    🗑️
+                </button>
+
+            `;
+
+
+            liste.appendChild(li);
+
+        }
+    );
 }
 
 
 function supprimerNote(index) {
 
     let notes =
-        JSON.parse(localStorage.getItem("notes")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "notes"
+            )
+        ) || [];
 
 
-    if (confirm("Supprimer cette note ?")) {
+    if (
+        confirm(
+            "Supprimer cette note ?"
+        )
+    ) {
 
-        notes.splice(index, 1);
+        notes.splice(
+            index,
+            1
+        );
 
 
         localStorage.setItem(
             "notes",
-            JSON.stringify(notes)
+            JSON.stringify(
+                notes
+            )
         );
 
 
@@ -713,62 +1004,189 @@ function supprimerNote(index) {
 }
 
 
-function mettreAJourStatistiques() {
+// =====================================================
+// STATISTIQUES
+// =====================================================
 
-    let eleves =
-        JSON.parse(localStorage.getItem("eleves")) || [];
+async function mettreAJourStatistiques() {
+
+    let eleves = [];
+
+
+    try {
+
+        const resultat =
+            await getDocs(
+                collection(db, "eleves")
+            );
+
+
+        eleves =
+            resultat.docs;
+
+    }
+
+    catch (erreur) {
+
+        console.error(
+            "Erreur statistiques élèves :",
+            erreur
+        );
+    }
 
 
     let enseignants =
-        JSON.parse(localStorage.getItem("enseignants")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "enseignants"
+            )
+        ) || [];
 
 
     let classes =
-        JSON.parse(localStorage.getItem("classes")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "classes"
+            )
+        ) || [];
 
 
     let matieres =
-        JSON.parse(localStorage.getItem("matieres")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "matieres"
+            )
+        ) || [];
 
 
     let notes =
-        JSON.parse(localStorage.getItem("notes")) || [];
+        JSON.parse(
+            localStorage.getItem(
+                "notes"
+            )
+        ) || [];
 
 
-    document.getElementById("nombreEleves").textContent =
-        eleves.length;
+    let nombreEleves =
+        document.getElementById(
+            "nombreEleves"
+        );
 
 
-    document.getElementById("nombreEnseignants").textContent =
-        enseignants.length;
+    let nombreEnseignants =
+        document.getElementById(
+            "nombreEnseignants"
+        );
 
 
-    document.getElementById("nombreClasses").textContent =
-        classes.length;
+    let nombreClasses =
+        document.getElementById(
+            "nombreClasses"
+        );
 
 
-    document.getElementById("nombreMatieres").textContent =
-        matieres.length;
+    let nombreMatieres =
+        document.getElementById(
+            "nombreMatieres"
+        );
 
 
-    document.getElementById("nombreNotes").textContent =
-        notes.length;
+    let nombreNotes =
+        document.getElementById(
+            "nombreNotes"
+        );
+
+
+    if (nombreEleves) {
+
+        nombreEleves.textContent =
+            eleves.length;
+    }
+
+
+    if (nombreEnseignants) {
+
+        nombreEnseignants.textContent =
+            enseignants.length;
+    }
+
+
+    if (nombreClasses) {
+
+        nombreClasses.textContent =
+            classes.length;
+    }
+
+
+    if (nombreMatieres) {
+
+        nombreMatieres.textContent =
+            matieres.length;
+    }
+
+
+    if (nombreNotes) {
+
+        nombreNotes.textContent =
+            notes.length;
+    }
 }
 
 
-window.onload = function() {
+// =====================================================
+// RENDRE LES FONCTIONS ACCESSIBLES AUX BOUTONS HTML
+// =====================================================
 
-    afficherAccueil();
+window.cacherSections =
+    cacherSections;
 
-    afficherElevesSauvegardes();
+window.afficherAccueil =
+    afficherAccueil;
 
-    afficherEnseignantsSauvegardes();
+window.afficherEleves =
+    afficherEleves;
 
-    afficherClassesSauvegardees();
+window.ajouterEleve =
+    ajouterEleve;
 
-    afficherMatieresSauvegardees();
+window.supprimerEleve =
+    supprimerEleve;
 
-    afficherNotesSauvegardees();
+window.viderEleves =
+    viderEleves;
 
-    mettreAJourStatistiques();
-}; 
+window.afficherEnseignants =
+    afficherEnseignants;
+
+window.ajouterEnseignant =
+    ajouterEnseignant;
+
+window.supprimerEnseignant =
+    supprimerEnseignant;
+
+window.afficherClasses =
+    afficherClasses;
+
+window.ajouterClasse =
+    ajouterClasse;
+
+window.supprimerClasse =
+    supprimerClasse;
+
+window.afficherMatieres =
+    afficherMatieres;
+
+window.ajouterMatiere =
+    ajouterMatiere;
+
+window.supprimerMatiere =
+    supprimerMatiere;
+
+window.afficherNotes =
+    afficherNotes;
+
+window.ajouterNote =
+    ajouterNote;
+
+window.supprimerNote =
+    supprimerNote;
