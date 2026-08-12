@@ -1,4 +1,5 @@
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 
 import {
     getFirestore,
@@ -7,16 +8,28 @@ import {
     getDocs,
     deleteDoc,
     doc
-} from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+}
+from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 
 const firebaseConfig = {
+
     apiKey: "AIzaSyAC5XlcpnhduauHiN9u-ML7fEBkSuHKAkg",
-    authDomain: "gestion-scolaire-ac269.firebaseapp.com",
-    projectId: "gestion-scolaire-ac269",
-    storageBucket: "gestion-scolaire-ac269.firebasestorage.app",
-    messagingSenderId: "237667733638",
-    appId: "1:237667733638:web:70a38ef93403fc718bc107"
+
+    authDomain:
+        "gestion-scolaire-ac269.firebaseapp.com",
+
+    projectId:
+        "gestion-scolaire-ac269",
+
+    storageBucket:
+        "gestion-scolaire-ac269.firebasestorage.app",
+
+    messagingSenderId:
+        "237667733638",
+
+    appId:
+        "1:237667733638:web:70a38ef93403fc718bc107"
 };
 
 
@@ -74,22 +87,26 @@ async function afficherEleves() {
 
 
 // =====================================================
-// AJOUTER UN ÉLÈVE DANS FIRESTORE
+// AJOUTER UN ÉLÈVE
 // =====================================================
 
 async function ajouterEleve() {
 
-    let nom =
+    const nom =
         document.getElementById("nomEleve").value.trim();
 
-    let prenom =
+    const prenom =
         document.getElementById("prenomEleve").value.trim();
 
-    let classe =
+    const classe =
         document.getElementById("classeEleve").value.trim();
 
 
-    if (nom === "" || prenom === "" || classe === "") {
+    if (
+        nom === "" ||
+        prenom === "" ||
+        classe === ""
+    ) {
 
         alert("Veuillez remplir tous les champs.");
 
@@ -122,30 +139,35 @@ async function ajouterEleve() {
 
         await afficherElevesSauvegardes();
 
-        mettreAJourStatistiques();
+        await mettreAJourStatistiques();
 
     }
 
     catch (erreur) {
 
-        console.error("Erreur Firebase :", erreur);
+        console.error(
+            "Erreur Firebase :",
+            erreur
+        );
 
-        alert("Impossible d'enregistrer l'élève.");
+        alert(
+            "Erreur : impossible d'enregistrer l'élève."
+        );
     }
 }
 
 
-// =====================================================
-// AFFICHER LES ÉLÈVES DE FIRESTORE
-// =====================================================
+
 
 async function afficherElevesSauvegardes() {
 
-    let tableau =
+    const tableau =
         document.getElementById("listeEleves");
 
 
-    if (!tableau) return;
+    if (!tableau) {
+        return;
+    }
 
 
     tableau.innerHTML = "";
@@ -154,17 +176,11 @@ async function afficherElevesSauvegardes() {
     try {
 
         const resultat =
-            await getDocs(collection(db, "eleves"));
+            await getDocs(
+                collection(db, "eleves")
+            );
 
 
-        let index = 1;
+        let numero = 1;
 
-
-        resultat.forEach(function(documentFirebase) {
-
-            let eleve =
-                documentFirebase.data();
-
-
-            let ligne =
-                tableau.insertR…
+…
