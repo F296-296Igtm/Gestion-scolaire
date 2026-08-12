@@ -182,4 +182,5 @@ async function afficherElevesSauvegardes() {
 
 
         let numero = 1;
+        console.long("SCRIPT JS CHARGE");
 
