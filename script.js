@@ -80,3 +80,33 @@ window.ajouterEleve = async function() {
         alert("Erreur lors de l'ajout de l'élève.");
     }
 };
+
+import { onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+onSnapshot(collection(db, "élève"), (snapshot) => {
+    const tableBody = document.getElementById("listeEleves");
+    const totalEleves = document.getElementById("nombreEleves");
+    
+    if (tableBody) {
+        tableBody.innerHTML = ""; // 
+        let index = 1;
+
+        snapshot.forEach((doc) => {
+            const eleve = doc.data();
+            const row = `
+                <tr>
+                    <td>${index++}</td>
+                    <td>${eleve.Nom || ''}</td>
+                    <td>${eleve.Prenom || ''}</td>
+                    <td>${eleve.Classe || ''}</td>
+                    <td><button class="danger" onclick="supprimerEleve('${doc.id}')">🗑️</button></td>
+                </tr>
+            `;
+            tableBody.innerHTML += row;
+        });
+    }
+
+    if (totalEleves) {
+        totalEleves.textContent = snapshot.size; // Met à jour le compteur sur le tableau de bord
+    }
+});
